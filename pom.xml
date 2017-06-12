@@ -28,7 +28,7 @@
 
   <groupId>org.gridkit.heapunit</groupId>
   <artifactId>heapunit-pom</artifactId>
-  <version>0.2-SNAPSHOT</version>
+  <version>0.2</version>
   <name>${project.groupId}::${project.artifactId}</name>
   <description>HeapUnit parent pom</description>
   <packaging>pom</packaging>
@@ -41,7 +41,7 @@
     <connection>scm:git:https://github.com/aragozin/heapunit.git</connection>
     <developerConnection>scm:git:https://github.com/aragozin/heapunit.git</developerConnection>
     <url>https://github.com/aragozin/heapunit</url>
-    <tag>HEAD</tag>
+    <tag>heapunit-pom-0.2</tag>
   </scm>
 
   <licenses>
