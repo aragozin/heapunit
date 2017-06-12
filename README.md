@@ -31,5 +31,5 @@ HeapUnit and dependencies is available in Maven Central Repo
 	<dependency>
 	    <groupId>org.gridkit.heapunit</groupId>
 	    <artifactId>heapunit</artifactId>
-	    <version>0.1</version>
+	    <version>0.2</version>
 	</dependency>
