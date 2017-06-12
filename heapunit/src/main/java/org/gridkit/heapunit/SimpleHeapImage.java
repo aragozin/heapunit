@@ -79,39 +79,39 @@ public class SimpleHeapImage implements HeapImage {
     @Override
     public long instanceCount(String selector) {
         long cc = 0;
-        for(@SuppressWarnings("unused") Instance i: iterate(selector)) {
+        for(@SuppressWarnings("unused") HeapInstance i: iterate(selector)) {
             cc++;
         }
         return cc;
     }
     
     @Override
-    public Instance instance(String selector) {
-        Iterator<Instance> it = iterate(selector).iterator();
+    public HeapInstance instance(String selector) {
+        Iterator<HeapInstance> it = iterate(selector).iterator();
         return it.hasNext() ? it.next() : null;
     }
 
     @Override
-    public Iterable<Instance> instances(String selector) {
+    public Iterable<HeapInstance> instances(String selector) {
         return iterate(selector);
     }
 
     @Override
-    public Iterable<Instance> instances(Class<?> c) {
+    public Iterable<HeapInstance> instances(Class<?> c) {
         final Set<JavaClass> types = getSubclasses(c);
-        return new Iterable<Instance>() {
+        return new Iterable<HeapInstance>() {
             
             @Override
-            public Iterator<Instance> iterator() {
+            public Iterator<HeapInstance> iterator() {
                 final Iterator<Instance> it = heap.getAllInstances().iterator();
-                return new AbsIt<Instance>() {
+                return new AbsIt<HeapInstance>() {
 
                     @Override
-                    protected Instance seek() {
+                    protected HeapInstance seek() {
                         while(it.hasNext()) {
                             Instance i = it.next();
                             if (types == null || types.contains(i.getJavaClass())) {
-                                return i;
+                                return new HeapInstance(SimpleHeapImage.this, i);
                             }
                         }
                         return null;
@@ -121,27 +121,27 @@ public class SimpleHeapImage implements HeapImage {
         };
     }
 
-    private Iterable<Instance> iterate(final String selector) {
+    private Iterable<HeapInstance> iterate(final String selector) {
         final Set<JavaClass> types = filterTypes(selector);       
         
         if (types != null && types.isEmpty()) {
             return Collections.emptyList();
         }
         
-        return new Iterable<Instance>() {
+        return new Iterable<HeapInstance>() {
             
             @Override
-            public Iterator<Instance> iterator() {
+            public Iterator<HeapInstance> iterator() {
                 
                 final RefSet visited = new RefSet();
                 final Iterator<Instance> instances = heap.getAllInstances().iterator();
                 
-                return new AbsIt<Instance>() {
+                return new AbsIt<HeapInstance>() {
 
                     Iterator<Instance> walker = null;
                     
                     @Override
-                    protected Instance seek() {
+                    protected HeapInstance seek() {
                         while(true) {
                             if (walker == null) {
                                 if (instances.hasNext()) {
@@ -159,7 +159,7 @@ public class SimpleHeapImage implements HeapImage {
                                 long a = i.getInstanceId();
                                 if (!visited.get(a)) {
                                     visited.set(a, true);
-                                    return i;
+                                    return new HeapInstance(SimpleHeapImage.this, i);
                                 }
                             }
                             else {
@@ -304,7 +304,8 @@ public class SimpleHeapImage implements HeapImage {
 
     @Override
     public <T> T rehydrateFirst(String selector) {
-        return rehydrate(instance(selector));
+    	HeapInstance hp = instance(selector);
+        return hp == null ? null : hp.<T>rehydrate();
     }
 
     @Override
@@ -313,13 +314,13 @@ public class SimpleHeapImage implements HeapImage {
 
             @Override
             public Iterator<T> iterator() {
-                final Iterator<Instance> it = instances(selector).iterator();
+                final Iterator<HeapInstance> it = instances(selector).iterator();
                 return new AbsIt<T>() {
 
                     @Override
                     @SuppressWarnings("unchecked")
                     protected T seek() {
-                        return it.hasNext() ? (T)rehydrate(it.next()) : null;
+                        return it.hasNext() ? (T)it.next().rehydrate() : null;
                     }
                 };
             }
@@ -327,18 +328,17 @@ public class SimpleHeapImage implements HeapImage {
     }
 
     @Override
-    public <T> Iterable<T> rehydrate(final Class<?> c) {
+    public <T> Iterable<T> rehydrate(final Class<T> c) {
         return new Iterable<T>() {
 
             @Override
             public Iterator<T> iterator() {
-                final Iterator<Instance> it = instances(c).iterator();
+                final Iterator<HeapInstance> it = instances(c).iterator();
                 return new AbsIt<T>() {
 
                     @Override
-                    @SuppressWarnings("unchecked")
                     protected T seek() {
-                        return it.hasNext() ? (T)rehydrate(it.next()) : null;
+                        return it.hasNext() ? it.next().<T>rehydrate() : null;
                     }
                 };
             }

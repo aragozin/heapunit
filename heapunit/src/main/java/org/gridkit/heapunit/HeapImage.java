@@ -24,11 +24,11 @@ public interface HeapImage {
 
     public long instanceCount(String selector);
     
-    public Instance instance(String selector);
+    public HeapInstance instance(String selector);
 
-    public Iterable<Instance> instances(String selector);
+    public Iterable<HeapInstance> instances(String selector);
 
-    public Iterable<Instance> instances(Class<?> c);
+    public Iterable<HeapInstance> instances(Class<?> c);
     
     public <T> T rehydrate(Instance instance);
 
@@ -36,7 +36,7 @@ public interface HeapImage {
 
     public <T> Iterable<T> rehydrate(String selector);
 
-    public <T> Iterable<T> rehydrate(Class<?> c);
+    public <T> Iterable<T> rehydrate(Class<T> c);
     
     public Heap getHeap();
 
